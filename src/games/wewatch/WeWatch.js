@@ -10,42 +10,69 @@ export default class WeWatch extends GameComponent {
     let users = this.getSessionUserIds();
     let userCount = users.length;
     this.state = {
-      eventLog: ["Welcome! There are " + userCount + " users in the room"]
+      eventLog: ["Welcome! There are " + userCount + " users in the room"],
+      firebaseData: {
+        playing: false,
+        timestamp: 0,
+        user_id: this.getMyUserId(),
+      },
     };
   }
 
   onVideoReady(e) {
-    console.log("Video ready", e.target);
+    console.log("Video ready", e);
     this.setState({ videoPlayer: e.target });
+    if (this.state.firebaseData.playing) {
+      console.log("Auto playing video");
+      e.target.seekTo(this.state.firebaseData.timestamp, true);
+      e.target.playVideo();
+    }
   }
 
   onVideoPlay(e) {
-    console.log("Pressed play", e.target);
-    this.getSessionDatabaseRef().set({
-      playing: true,
-      timestamp: e.target.getCurrentTime(),
-    });
+    if (!this.state.firebaseData.playing) {
+      console.log("Pressed play", e);
+      this.getSessionDatabaseRef().set({
+        playing: true,
+        timestamp: e.target.getCurrentTime(),
+        user_id: this.getMyUserId(),
+      });
+    }
   }
 
   onVideoPause(e) {
-    console.log("Pressed pause", e.target);
-    this.getSessionDatabaseRef().set({ playing: false });
+    if (this.state.firebaseData.playing) {
+      console.log("Pressed pause", e);
+      this.getSessionDatabaseRef().set({
+        playing: false,
+        timestamp: e.target.getCurrentTime(),
+        user_id: this.getMyUserId(),
+      });
+    }
   }
 
   onSessionDataChanged(data) {
-    if (this.state.videoPlayer) {
-      if (data.playing === true) {
-        // video should play (someone else pressed play)
-        console.log("Firebase change: video now playing");
-        this.state.videoPlayer.seekTo(data.timestamp, true);
-        this.state.videoPlayer.playVideo();
-      } else {
-        // video should pause (someone else pressed pause)
-        console.log("Firebase change: video now paused");
-        this.state.videoPlayer.pauseVideo();
-      }
+    this.setState({ firebaseData: data });
+
+    if (data.user_id === this.getMyUserId()) {
+      console.log("Ignoring Firebase change: you made the change");
+      return;
+    }
+
+    if (!this.state.videoPlayer) {
+      console.log("Ignoring Firebase change: video player not ready yet");
+      return;
+    }
+
+    if (data.playing === true) {
+      // video should play (someone else pressed play)
+      console.log("Firebase change: video now playing");
+      this.state.videoPlayer.seekTo(data.timestamp, true);
+      this.state.videoPlayer.playVideo();
     } else {
-      console.log("Video player not ready yet");
+      // video should pause (someone else pressed pause)
+      console.log("Firebase change: video now paused");
+      this.state.videoPlayer.pauseVideo();
     }
   }
 
