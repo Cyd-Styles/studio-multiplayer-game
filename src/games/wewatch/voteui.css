@@ -1,0 +1,8 @@
+.VoteUI {
+  width: 12.5%;
+  position: fixed;
+  left: 0px;
+  bottom: 0px;
+  background-color: red;
+  padding: 16px;
+}

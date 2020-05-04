@@ -2,6 +2,7 @@ import GameComponent from "../../GameComponent.js";
 import React from "react";
 import YouTube from "react-youtube";
 import SocialUI from "./SocialUI.js";
+import VoteUI from "./VoteUI.js";
 import "./wewatch.css";
 
 export default class WeWatch extends GameComponent {
@@ -15,7 +16,9 @@ export default class WeWatch extends GameComponent {
         playing: false,
         timestamp: 0,
         user_id: this.getMyUserId(),
-      },
+        like_count: 0,
+        dislike_count: 0
+      }
     };
   }
 
@@ -32,7 +35,7 @@ export default class WeWatch extends GameComponent {
   onVideoPlay(e) {
     if (!this.state.firebaseData.playing) {
       console.log("Pressed play", e);
-      this.getSessionDatabaseRef().set({
+      this.getSessionDatabaseRef().update({
         playing: true,
         timestamp: e.target.getCurrentTime(),
         user_id: this.getMyUserId(),
@@ -43,7 +46,7 @@ export default class WeWatch extends GameComponent {
   onVideoPause(e) {
     if (this.state.firebaseData.playing) {
       console.log("Pressed pause", e);
-      this.getSessionDatabaseRef().set({
+      this.getSessionDatabaseRef().update({
         playing: false,
         timestamp: e.target.getCurrentTime(),
         user_id: this.getMyUserId(),
@@ -76,6 +79,22 @@ export default class WeWatch extends GameComponent {
     }
   }
 
+  handleLikePressed() {
+    // Update the firebase database count of likes
+    let currentLikeCount = this.state.firebaseData.like_count;
+    this.getSessionDatabaseRef().update({
+      like_count: currentLikeCount + 1
+    });
+  }
+
+  handleDislikePressed() {
+    // Update the firebase database count of dislikes
+    let currentDislikeCount = this.state.firebaseData.dislike_count;
+    this.getSessionDatabaseRef().update({
+      dislike_count: currentDislikeCount + 1
+    });
+  }
+
   render() {
     let opts = {
       width: "100%",
@@ -87,6 +106,12 @@ export default class WeWatch extends GameComponent {
     };
     return (
       <div className="wewatch">
+        <VoteUI
+          like={this.state.firebaseData.like_count}
+          dislike={this.state.firebaseData.dislike_count}
+          onLikePressed={e => this.handleLikePressed()}
+          onDislikePressed={e => this.handleDislikePressed()}
+        />
         <SocialUI eventLog={this.state.eventLog} />
         <YouTube
           containerClassName="player"
