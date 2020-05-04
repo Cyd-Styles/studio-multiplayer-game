@@ -55,7 +55,8 @@ export default class WeWatch extends GameComponent {
   }
 
   onSessionDataChanged(data) {
-    this.setState({ firebaseData: data });
+    let mergedData = Object.assign(this.state.firebaseData, data);
+    this.setState({ firebaseData: mergedData });
 
     if (data.user_id === this.getMyUserId()) {
       console.log("Ignoring Firebase change: you made the change");
@@ -83,7 +84,8 @@ export default class WeWatch extends GameComponent {
     // Update the firebase database count of likes
     let currentLikeCount = this.state.firebaseData.like_count;
     this.getSessionDatabaseRef().update({
-      like_count: currentLikeCount + 1
+      like_count: currentLikeCount + 1,
+      user_id: this.getMyUserId()
     });
   }
 
@@ -91,7 +93,8 @@ export default class WeWatch extends GameComponent {
     // Update the firebase database count of dislikes
     let currentDislikeCount = this.state.firebaseData.dislike_count;
     this.getSessionDatabaseRef().update({
-      dislike_count: currentDislikeCount + 1
+      dislike_count: currentDislikeCount + 1,
+      user_id: this.getMyUserId()
     });
   }
 
