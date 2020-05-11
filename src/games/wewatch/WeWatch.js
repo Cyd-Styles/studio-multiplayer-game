@@ -17,7 +17,8 @@ export default class WeWatch extends GameComponent {
         timestamp: 0,
         user_id: this.getMyUserId(),
         like_count: 0,
-        dislike_count: 0
+        dislike_count: 0,
+        playlist: []
       }
     };
   }
@@ -38,7 +39,7 @@ export default class WeWatch extends GameComponent {
       this.getSessionDatabaseRef().update({
         playing: true,
         timestamp: e.target.getCurrentTime(),
-        user_id: this.getMyUserId(),
+        user_id: this.getMyUserId()
       });
     }
   }
@@ -49,7 +50,7 @@ export default class WeWatch extends GameComponent {
       this.getSessionDatabaseRef().update({
         playing: false,
         timestamp: e.target.getCurrentTime(),
-        user_id: this.getMyUserId(),
+        user_id: this.getMyUserId()
       });
     }
   }
