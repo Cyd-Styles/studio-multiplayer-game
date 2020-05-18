@@ -25,11 +25,12 @@ export default class WeWatch extends GameComponent {
 
   onVideoReady(e) {
     console.log("Video ready", e);
-    this.setState({ videoPlayer: e.target });
+    let player = e.target;
+    this.setState({ videoPlayer: player });
     if (this.state.firebaseData.playing) {
       console.log("Auto playing video");
-      e.target.seekTo(this.state.firebaseData.timestamp, true);
-      e.target.playVideo();
+      player.seekTo(this.state.firebaseData.timestamp, true);
+      player.playVideo();
     }
   }
 
@@ -111,6 +112,14 @@ export default class WeWatch extends GameComponent {
     });
   }
 
+  isVideoPlaylistEmpty() {
+    if (this.state.firebaseData.playlist.length === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   render() {
     let opts = {
       width: "100%",
@@ -120,6 +129,26 @@ export default class WeWatch extends GameComponent {
         modestbranding: 1
       }
     };
+
+    let youtubeElement;
+    if (this.isVideoPlaylistEmpty()) {
+      youtubeElement = <div />;
+    } else {
+      let urlString = this.state.firebaseData.playlist[0].url;
+      let url = new URL(urlString);
+      let videoId = url.searchParams.get("v");
+      youtubeElement = (
+        <YouTube
+          containerClassName="player"
+          videoId={videoId}
+          opts={opts}
+          onPlay={e => this.onVideoPlay(e)}
+          onPause={e => this.onVideoPause(e)}
+          onReady={e => this.onVideoReady(e)}
+        />
+      );
+    }
+
     return (
       <div className="wewatch">
         <VoteUI
@@ -132,14 +161,7 @@ export default class WeWatch extends GameComponent {
           onVideoAdd={(title, url) => this.handleVideoAdd(title, url)}
           eventLog={this.state.eventLog}
         />
-        <YouTube
-          containerClassName="player"
-          videoId="fH3X2U9t2P0"
-          opts={opts}
-          onPlay={e => this.onVideoPlay(e)}
-          onPause={e => this.onVideoPause(e)}
-          onReady={e => this.onVideoReady(e)}
-        />
+        {youtubeElement}
       </div>
     );
   }
