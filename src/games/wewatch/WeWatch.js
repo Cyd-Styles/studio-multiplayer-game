@@ -99,6 +99,18 @@ export default class WeWatch extends GameComponent {
     });
   }
 
+  handleVideoAdd(title, url) {
+    let new_playlist_item = {
+      title: title,
+      url: url
+    };
+    let playlist = this.state.firebaseData.playlist;
+    playlist.push(new_playlist_item);
+    this.getSessionDatabaseRef().update({
+      playlist: playlist
+    });
+  }
+
   render() {
     let opts = {
       width: "100%",
@@ -116,7 +128,10 @@ export default class WeWatch extends GameComponent {
           onLikePressed={e => this.handleLikePressed()}
           onDislikePressed={e => this.handleDislikePressed()}
         />
-        <SocialUI eventLog={this.state.eventLog} />
+        <SocialUI
+          onVideoAdd={(title, url) => this.handleVideoAdd(title, url)}
+          eventLog={this.state.eventLog}
+        />
         <YouTube
           containerClassName="player"
           videoId="fH3X2U9t2P0"

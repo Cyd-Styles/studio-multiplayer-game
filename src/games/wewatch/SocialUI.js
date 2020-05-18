@@ -17,6 +17,11 @@ export default class SocialUI extends React.Component {
 
   handleAdd() {
     console.log("Add Video Clicked", this.state);
+    this.props.onVideoAdd(this.state.video_title, this.state.video_url);
+    this.setState({
+      video_title: "",
+      video_url: ""
+    });
   }
 
   handleVideoTitleChange(e) {
