@@ -38,6 +38,7 @@ export default class SocialUI extends React.Component {
     return (
       <div className="SocialUI">
         <div className="RedBox">
+          <div className="EventLog">{this.props.eventLog}</div>
           <div className="AddVideoForm">
             <input
               placeholder="Title"
@@ -50,7 +51,6 @@ export default class SocialUI extends React.Component {
               value={this.state.video_url}
             />
           </div>
-          <div className="EventLog">{this.props.eventLog}</div>
         </div>
 
         <div className="Buttons">
