@@ -58,6 +58,10 @@ export default class WeWatch extends GameComponent {
 
   onSessionDataChanged(data) {
     let mergedData = Object.assign(this.state.firebaseData, data);
+    // Check if Firebase data is missing playlist
+    if (!("playlist" in data)) {
+      mergedData.playlist = [];
+    }
     this.setState({ firebaseData: mergedData });
 
     if (data.user_id === this.getMyUserId()) {
@@ -108,7 +112,20 @@ export default class WeWatch extends GameComponent {
     let playlist = this.state.firebaseData.playlist;
     playlist.push(new_playlist_item);
     this.getSessionDatabaseRef().update({
-      playlist: playlist
+      playlist: playlist,
+      user_id: this.getMyUserId()
+    });
+  }
+
+  handleNextVideo() {
+    // Remove playlist item from front of playlist array.
+    let playlist = this.state.firebaseData.playlist;
+    playlist.shift();
+    this.getSessionDatabaseRef().update({
+      playlist: playlist,
+      like_count: 0,
+      dislike_count: 0,
+      user_id: this.getMyUserId()
     });
   }
 
@@ -117,6 +134,15 @@ export default class WeWatch extends GameComponent {
       return true;
     } else {
       return false;
+    }
+  }
+
+  getNextVideoTitle() {
+    let playlist = this.state.firebaseData.playlist;
+    if (playlist.length < 2) {
+      return "";
+    } else {
+      return playlist[1].title; // Return second item's title.
     }
   }
 
@@ -158,7 +184,9 @@ export default class WeWatch extends GameComponent {
           onDislikePressed={e => this.handleDislikePressed()}
         />
         <SocialUI
+          onNextVideo={() => this.handleNextVideo()}
           onVideoAdd={(title, url) => this.handleVideoAdd(title, url)}
+          nextVideoTitle={this.getNextVideoTitle()}
           eventLog={this.state.eventLog}
         />
         {youtubeElement}

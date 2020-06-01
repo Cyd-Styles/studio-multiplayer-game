@@ -11,8 +11,9 @@ export default class SocialUI extends React.Component {
     };
   }
 
-  handleShowAll() {
-    console.log("Show all clicked");
+  handlePlayNextVideo() {
+    console.log("Play next video clicked");
+    this.props.onNextVideo();
   }
 
   handleAdd() {
@@ -22,6 +23,25 @@ export default class SocialUI extends React.Component {
       video_title: "",
       video_url: ""
     });
+  }
+
+  isInvalidTitle() {
+    let title = this.state.video_title;
+    // Check if the string is not empty
+    if (title === "") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  isInvalidUrl() {
+    let url = this.state.video_url;
+    if (url === "") {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   handleVideoTitleChange(e) {
@@ -50,17 +70,24 @@ export default class SocialUI extends React.Component {
               onChange={e => this.handleVideoUrlChange(e)}
               value={this.state.video_url}
             />
+            <button
+              disabled={this.isInvalidTitle() || this.isInvalidUrl()}
+              className="AddVideo"
+              onClick={e => this.handleAdd()}
+            >
+              Add
+            </button>
           </div>
         </div>
 
         <div className="Buttons">
-          <button className="ShowAll" onClick={e => this.handleShowAll()}>
-            Show All
+          <button
+            className="NextVideo"
+            onClick={e => this.handlePlayNextVideo()}
+          >
+            Play next video
           </button>
-          <div className="NextVideo">Next video title</div>
-          <button className="AddVideo" onClick={e => this.handleAdd()}>
-            Add
-          </button>
+          <div className="NextVideo">{this.props.nextVideoTitle}</div>
         </div>
       </div>
     );
