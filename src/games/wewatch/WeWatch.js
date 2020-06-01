@@ -65,24 +65,42 @@ export default class WeWatch extends GameComponent {
     this.setState({ firebaseData: mergedData });
 
     if (data.user_id === this.getMyUserId()) {
-      console.log("Ignoring Firebase change: you made the change");
+      console.log("Not updating video player: you made the change");
+      return;
+    }
+    if (mergedData.playlist.length === 0) {
+      console.log("Not updating video player: playlist is empty");
+      return;
+    }
+    if (!this.state.videoPlayer) {
+      console.log("Not updating video player: video player not ready yet");
+      return;
+    }
+    if (!this.state.videoPlayer.getVideoUrl()) {
+      console.log("Not updating video player: no video URL");
       return;
     }
 
-    if (!this.state.videoPlayer) {
-      console.log("Ignoring Firebase change: video player not ready yet");
-      return;
-    }
+    console.log("Video player URL", this.state.videoPlayer.getVideoUrl());
+    console.log("Video player status", this.state.videoPlayer.getPlayerState());
 
     if (data.playing === true) {
       // video should play (someone else pressed play)
       console.log("Firebase change: video now playing");
-      this.state.videoPlayer.seekTo(data.timestamp, true);
-      this.state.videoPlayer.playVideo();
+      try {
+        this.state.videoPlayer.seekTo(data.timestamp, true);
+        this.state.videoPlayer.playVideo();
+      } catch (err) {
+        console.log("Warning: tried playing an unloaded video");
+      }
     } else {
       // video should pause (someone else pressed pause)
       console.log("Firebase change: video now paused");
-      this.state.videoPlayer.pauseVideo();
+      try {
+        this.state.videoPlayer.pauseVideo();
+      } catch (err) {
+        console.log("Warning: tried pausing an unloaded video");
+      }
     }
   }
 
@@ -125,6 +143,8 @@ export default class WeWatch extends GameComponent {
       playlist: playlist,
       like_count: 0,
       dislike_count: 0,
+      playing: false,
+      timestamp: 0,
       user_id: this.getMyUserId()
     });
   }
